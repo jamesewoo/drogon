@@ -21,7 +21,8 @@ RUN apt-get update && \
     ant \
     libz-dev \
     libbz2-dev \
-    liblzma5 && \
+    liblzma-dev \
+    libboost-all-dev && \
     rm -rf /var/lib/apt/lists/* && \
     pip install argparse \
         cmake && \
