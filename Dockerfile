@@ -1,5 +1,6 @@
 FROM ubuntu:bionic
 
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
 
 COPY joshua $JOSHUA
@@ -14,24 +15,23 @@ WORKDIR $JOSHUA
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    openjdk-8-jdk-headless \
     build-essential \
+    libboost-all-dev \
+    cmake \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
     python-minimal \
     python-pip \
     maven \
-    ant \
-    libz-dev \
-    libbz2-dev \
-    liblzma-dev \
-    libboost-all-dev \
-    libeigen3-dev && \
+    ant-optional && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install argparse \
-        cmake && \
-    mvn clean package
-RUN ./jni/build_kenlm.sh && \
-    $(cd $JOSHUA/ext/berkeleylm; ant) && \
-    $(cd $JOSHUA/thrax; ant) && \
+    mvn clean package && \
+    ./jni/build_kenlm.sh
+RUN (cd $JOSHUA/ext/berkeleylm; ant) && \
+    (cd $JOSHUA/thrax; ant) && \
     make -j4 -C ext/giza-pp all install && \
     make -C ext/symal all && \
-    $(cd $JOSHUA/ext/berkeleyaligner; ant)
-    
+    (cd $JOSHUA/ext/berkeleyaligner; ant)
+
