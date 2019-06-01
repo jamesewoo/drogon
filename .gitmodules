@@ -1,0 +1,21 @@
+[submodule "kenlm"]
+	path = kenlm
+	url = https://github.com/kpu/kenlm.git
+[submodule "berkeleylm"]
+	path = berkeleylm
+	url = https://github.com/joshua-decoder/berkeleylm.git
+[submodule "thrax"]
+	path = thrax
+	url = https://github.com/joshua-decoder/thrax.git
+[submodule "giza-pp"]
+	path = giza-pp
+	url = https://github.com/joshua-decoder/giza-pp.git
+[submodule "symal"]
+	path = symal
+	url = https://github.com/joshua-decoder/symal.git
+[submodule "berkeleyaligner"]
+	path = berkeleyaligner
+	url = https://github.com/joshua-decoder/berkeleyaligner
+[submodule "joshua"]
+	path = joshua
+	url = https://github.com/jamesewoo/joshua.git
