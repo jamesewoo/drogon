@@ -28,8 +28,8 @@ RUN apt-get update && \
     ant-optional && \
     rm -rf /var/lib/apt/lists/* && \
     mvn clean package && \
-    ./jni/build_kenlm.sh
-RUN (cd $JOSHUA/ext/berkeleylm; ant) && \
+    ./jni/build_kenlm.sh && \
+    (cd $JOSHUA/ext/berkeleylm; ant) && \
     (cd $JOSHUA/thrax; ant) && \
     make -j4 -C ext/giza-pp all install && \
     make -C ext/symal all && \
