@@ -22,7 +22,8 @@ RUN apt-get update && \
     libz-dev \
     libbz2-dev \
     liblzma-dev \
-    libboost-all-dev && \
+    libboost-all-dev \
+    libeigen3-dev && \
     rm -rf /var/lib/apt/lists/* && \
     pip install argparse \
         cmake && \
