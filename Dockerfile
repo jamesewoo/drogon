@@ -1,17 +1,17 @@
-FROM ubuntu:bionic
+FROM ubuntu:bionic as devel
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
 
-COPY joshua $JOSHUA
-COPY kenlm $JOSHUA/ext/kenlm/
-COPY berkeleylm $JOSHUA/ext/berkeleylm/
-COPY thrax $JOSHUA/thrax/
-COPY giza-pp $JOSHUA/ext/giza-pp/
-COPY symal $JOSHUA/ext/symal/
-COPY berkeleyaligner $JOSHUA/ext/berkeleyaligner/
-
 WORKDIR $JOSHUA
+
+COPY joshua .
+COPY kenlm ext/kenlm/
+COPY berkeleylm ext/berkeleylm/
+COPY thrax thrax/
+COPY giza-pp ext/giza-pp/
+COPY symal ext/symal/
+COPY berkeleyaligner ext/berkeleyaligner/
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -29,9 +29,26 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     mvn clean package && \
     ./jni/build_kenlm.sh && \
-    (cd $JOSHUA/ext/berkeleylm; ant) && \
-    (cd $JOSHUA/thrax; ant) && \
+    (cd ext/berkeleylm; ant) && \
+    (cd thrax; ant) && \
     make -j4 -C ext/giza-pp all install && \
     make -C ext/symal all && \
-    (cd $JOSHUA/ext/berkeleyaligner; ant)
+    (cd ext/berkeleyaligner; ant)
+
+
+FROM ubuntu:bionic AS runtime
+
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
+ENV JOSHUA /opt/joshua
+
+WORKDIR $JOSHUA
+
+COPY --from=devel $JOSHUA .
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    openjdk-8-jdk-headless \
+    libboost-program-options-dev \
+    libboost-system-dev \
+    libboost-thread-dev
 
