@@ -14,25 +14,26 @@ COPY symal ext/symal/
 COPY berkeleyaligner ext/berkeleyaligner/
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    openjdk-8-jdk-headless \
-    build-essential \
-    libboost-all-dev \
-    cmake \
-    zlib1g-dev \
-    libbz2-dev \
-    liblzma-dev \
-    python-minimal \
-    python-pip \
-    maven \
-    ant-optional && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends -y \
+        openjdk-8-jdk-headless \
+        build-essential \
+        libboost-all-dev \
+        cmake \
+        zlib1g-dev \
+        libbz2-dev \
+        liblzma-dev \
+        python-minimal \
+        python-pip \
+        maven \
+        ant-optional && \
     rm -rf /var/lib/apt/lists/* && \
     mvn clean package && \
     ./jni/build_kenlm.sh && \
     (cd ext/berkeleylm; ant) && \
     (cd thrax; ant) && \
-    make -j4 -C ext/giza-pp all install && \
-    make -C ext/symal all && \
+    make -j -C ext/giza-pp all install && \
+    make -j -C ext/symal all && \
     (cd ext/berkeleyaligner; ant)
 
 
@@ -46,9 +47,48 @@ WORKDIR $JOSHUA
 COPY --from=devel $JOSHUA .
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    openjdk-8-jdk-headless \
-    libboost-program-options-dev \
-    libboost-system-dev \
-    libboost-thread-dev
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends -y \
+        openjdk-8-jdk-headless \
+        libboost-program-options-dev \
+        libboost-system-dev \
+        libboost-thread-dev \
+        file \
+        perl \
+        libc-dev
 
+
+FROM runtime AS debug
+
+ENV HOME /root
+ENV SPANISH $HOME/git/fisher-callhome-corpus
+
+WORKDIR $HOME
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends -y \
+        curl \
+        unzip \
+        less \
+        gdb && \
+    (mkdir $HOME/git && \
+        cd $HOME/git && \
+        curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
+        unzip fisher-callhome-corpus.zip && \
+        mv joshua-decoder-*/ fisher-callhome-corpus)
+
+# RUN (mkdir -p $HOME/expts/joshua && \
+#         cd $HOME/expts/joshua && \
+#         $JOSHUA/bin/pipeline.pl \
+#             --type hiero \
+#             --rundir 1 \
+#             --readme "Baseline Hiero run" \
+#             --source es \
+#             --target en \
+#             --witten-bell \
+#             --corpus $SPANISH/corpus/asr/callhome_train \
+#             --corpus $SPANISH/corpus/asr/fisher_train \
+#             --tune $SPANISH/corpus/asr/fisher_dev \
+#             --test $SPANISH/corpus/asr/callhome_devtest \
+#             --lm-order 3)
