@@ -3,7 +3,7 @@ FROM ubuntu:bionic as devel
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
 
-WORKDIR $JOSHUA
+WORKDIR "$JOSHUA"
 
 COPY joshua .
 COPY kenlm ext/kenlm/
@@ -39,12 +39,15 @@ RUN apt-get update && \
 
 FROM ubuntu:bionic AS runtime
 
+ENV HADOOP_HOME /opt/hadoop
+ENV HOME /root
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
+ENV USER root
 
-WORKDIR $JOSHUA
+WORKDIR "$JOSHUA"
 
-COPY --from=devel $JOSHUA .
+COPY --from=devel "$JOSHUA" .
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -55,40 +58,47 @@ RUN apt-get update && \
         libboost-thread-dev \
         file \
         perl \
-        libc-dev
+        build-essential \
+        ssh \
+        rsync \
+        curl && \
+    HADOOP_VERSION=2.9.2 && \
+    curl -O "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" && \
+    tar xzf "hadoop-${HADOOP_VERSION}.tar.gz" && \
+    rm "hadoop-${HADOOP_VERSION}.tar.gz" && \
+    mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME" && \
+    export PATH="$PATH:$HADOOP_HOME/bin"
 
 
 FROM runtime AS debug
 
-ENV HOME /root
-ENV SPANISH $HOME/git/fisher-callhome-corpus
+ENV SPANISH "$HOME/git/fisher-callhome-corpus"
 
-WORKDIR $HOME
+WORKDIR "$HOME"
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends -y \
-        curl \
         unzip \
         less \
         gdb && \
-    (mkdir $HOME/git && \
-        cd $HOME/git && \
+    (mkdir "$HOME/git" && \
+        cd "$HOME/git" && \
         curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
         unzip fisher-callhome-corpus.zip && \
         mv joshua-decoder-*/ fisher-callhome-corpus)
 
-# RUN (mkdir -p $HOME/expts/joshua && \
-#         cd $HOME/expts/joshua && \
-#         $JOSHUA/bin/pipeline.pl \
-#             --type hiero \
-#             --rundir 1 \
-#             --readme "Baseline Hiero run" \
-#             --source es \
-#             --target en \
-#             --witten-bell \
-#             --corpus $SPANISH/corpus/asr/callhome_train \
-#             --corpus $SPANISH/corpus/asr/fisher_train \
-#             --tune $SPANISH/corpus/asr/fisher_dev \
-#             --test $SPANISH/corpus/asr/callhome_devtest \
-#             --lm-order 3)
+RUN (mkdir -p "$HOME/expts/joshua" && \
+        cd "$HOME/expts/joshua" && \
+        "$JOSHUA/bin/pipeline.pl" \
+            --type hiero \
+            --rundir 1 \
+            --readme "Baseline Hiero run" \
+            --source es \
+            --target en \
+            --witten-bell \
+            --corpus "$SPANISH/corpus/asr/callhome_train" \
+            --corpus "$SPANISH/corpus/asr/fisher_train" \
+            --tune "$SPANISH/corpus/asr/fisher_dev" \
+            --test "$SPANISH/corpus/asr/callhome_devtest" \
+            --lm-order 3)
