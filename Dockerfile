@@ -24,7 +24,6 @@ RUN apt-get update && \
         libbz2-dev \
         liblzma-dev \
         python-minimal \
-        python-pip \
         maven \
         ant-optional && \
     rm -rf /var/lib/apt/lists/* && \
@@ -43,6 +42,7 @@ ENV HADOOP_HOME /opt/hadoop
 ENV HOME /root
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
+ENV PATH "${HADOOP_HOME}/bin:${PATH}"
 ENV USER root
 
 WORKDIR "$JOSHUA"
@@ -61,13 +61,13 @@ RUN apt-get update && \
         build-essential \
         ssh \
         rsync \
-        curl && \
+        curl \
+        python && \
     HADOOP_VERSION=2.9.2 && \
     curl -O "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" && \
     tar xzf "hadoop-${HADOOP_VERSION}.tar.gz" && \
     rm "hadoop-${HADOOP_VERSION}.tar.gz" && \
-    mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME" && \
-    export PATH="$PATH:$HADOOP_HOME/bin"
+    mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME"
 
 
 FROM runtime AS debug
