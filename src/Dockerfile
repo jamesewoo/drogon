@@ -1,4 +1,4 @@
-FROM ubuntu:bionic as devel
+FROM ubuntu:bionic as builder
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
@@ -47,7 +47,7 @@ ENV USER root
 
 WORKDIR "$JOSHUA"
 
-COPY --from=devel "$JOSHUA" .
+COPY --from=builder "$JOSHUA" .
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -64,41 +64,6 @@ RUN apt-get update && \
         curl \
         python && \
     HADOOP_VERSION=2.9.2 && \
-    curl -O "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" && \
-    tar xzf "hadoop-${HADOOP_VERSION}.tar.gz" && \
-    rm "hadoop-${HADOOP_VERSION}.tar.gz" && \
+    curl -SL "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
+    tar -xz && \
     mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME"
-
-
-FROM runtime AS debug
-
-ENV SPANISH "$HOME/git/fisher-callhome-corpus"
-
-WORKDIR "$HOME"
-
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends -y \
-        unzip \
-        less \
-        gdb && \
-    (mkdir "$HOME/git" && \
-        cd "$HOME/git" && \
-        curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
-        unzip fisher-callhome-corpus.zip && \
-        mv joshua-decoder-*/ fisher-callhome-corpus)
-
-RUN (mkdir -p "$HOME/expts/joshua" && \
-        cd "$HOME/expts/joshua" && \
-        "$JOSHUA/bin/pipeline.pl" \
-            --type hiero \
-            --rundir 1 \
-            --readme "Baseline Hiero run" \
-            --source es \
-            --target en \
-            --witten-bell \
-            --corpus "$SPANISH/corpus/asr/callhome_train" \
-            --corpus "$SPANISH/corpus/asr/fisher_train" \
-            --tune "$SPANISH/corpus/asr/fisher_dev" \
-            --test "$SPANISH/corpus/asr/callhome_devtest" \
-            --lm-order 3)
