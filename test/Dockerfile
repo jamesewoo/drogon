@@ -1,6 +1,5 @@
 FROM jwoo11/drogon:runtime AS trainer
 
-ENV MODELS_DIR /models
 ENV SPANISH "$HOME/git/fisher-callhome-corpus"
 
 WORKDIR "$HOME"

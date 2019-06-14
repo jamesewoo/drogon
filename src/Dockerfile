@@ -68,3 +68,5 @@ RUN apt-get update && \
     curl -SL "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
     tar -xz && \
     mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME"
+
+ENV MODELS_DIR /models
