@@ -1,6 +1,6 @@
-FROM jwoo11/drogon:runtime AS train
+FROM jwoo11/drogon:runtime AS trainer
 
-ENV JOSHUA_SERVER_PORT 5674
+ENV MODELS_DIR /models
 ENV SPANISH "$HOME/git/fisher-callhome-corpus"
 
 WORKDIR "$HOME"
@@ -15,8 +15,8 @@ RUN apt-get update && \
         curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
         unzip fisher-callhome-corpus.zip && \
         mv joshua-decoder-*/ fisher-callhome-corpus) && \
-    (mkdir -p expts/joshua && \
-        cd expts/joshua && \
+    (mkdir -p "$MODELS_DIR/es-en" && \
+        cd "$MODELS_DIR/es-en" && \
         "$JOSHUA/bin/pipeline.pl" \
             --type hiero \
             --rundir 1 \
@@ -29,18 +29,18 @@ RUN apt-get update && \
             --tune "$SPANISH/corpus/asr/fisher_dev" \
             --test "$SPANISH/corpus/asr/callhome_devtest" \
             --lm-order 3)
-            
-            
-FROM train AS test
 
-WORKDIR "$HOME"
 
-RUN (cd expts/joshua && \
-        "$JOSHUA/scripts/language-pack/build_lp.sh" es-en 1/tune/joshua.config.final 8g && \
-        for release in releases/apache-joshua-*; do \
-            "$JOSHUA/bin/joshua" -m 8g -server-port "$JOSHUA_SERVER_PORT" -server-type http -c 1/tune/joshua.config.final \
-                -top-n 1 -output-format "%S" -mark-oovs false -lower-case true -project-case true & \
-            until curl "localhost:$JOSHUA_SERVER_PORT/translate?q=yo+quiero+taco+bell"; do \
-                sleep 1; \
-            done; \
-        done)
+FROM trainer AS tester
+
+ENV JOSHUA_SERVER_PORT 5674
+
+WORKDIR "$MODELS_DIR/es-en"
+
+COPY test.sh .
+
+RUN "$JOSHUA/scripts/language-pack/build_lp.sh" es-en 1/tune/joshua.config.final 8g
+
+ENTRYPOINT ["./test.sh"]
+
+CMD ["es"]

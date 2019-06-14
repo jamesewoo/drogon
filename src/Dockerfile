@@ -28,6 +28,7 @@ RUN apt-get update && \
         ant-optional && \
     rm -rf /var/lib/apt/lists/* && \
     mvn clean package && \
+    rm -rf src/test target/joshua-*-src* target/test-classes && \
     ./jni/build_kenlm.sh && \
     (cd ext/berkeleylm; ant) && \
     (cd thrax; ant) && \
