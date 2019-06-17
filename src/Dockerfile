@@ -37,7 +37,7 @@ RUN apt-get update && \
     (cd ext/berkeleyaligner; ant)
 
 
-FROM ubuntu:bionic AS runtime
+FROM nginx AS runtime
 
 ENV HADOOP_HOME /opt/hadoop
 ENV HOME /root
@@ -50,7 +50,8 @@ WORKDIR "$JOSHUA"
 
 COPY --from=builder "$JOSHUA" .
 
-RUN apt-get update && \
+RUN mkdir -p /usr/share/man/man1 && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends -y \
         openjdk-8-jdk-headless \
@@ -64,6 +65,7 @@ RUN apt-get update && \
         rsync \
         curl \
         python && \
+    rm -rf /var/lib/apt/lists/* && \
     HADOOP_VERSION=2.9.2 && \
     curl -SL "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
     tar -xz && \

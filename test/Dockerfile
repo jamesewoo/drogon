@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
         unzip \
         less && \
+    rm -rf /var/lib/apt/lists/* && \
     (mkdir git && \
         cd git && \
         curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
