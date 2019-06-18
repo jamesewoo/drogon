@@ -1,4 +1,4 @@
-FROM ubuntu:bionic as builder
+FROM debian:stretch-slim as builder
 
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
@@ -13,7 +13,8 @@ COPY giza-pp ext/giza-pp/
 COPY symal ext/symal/
 COPY berkeleyaligner ext/berkeleyaligner/
 
-RUN apt-get update && \
+RUN mkdir -p /usr/share/man/man1 && \
+    apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends -y \
         openjdk-8-jdk-headless \
@@ -58,6 +59,7 @@ RUN mkdir -p /usr/share/man/man1 && \
         libboost-program-options-dev \
         libboost-system-dev \
         libboost-thread-dev \
+        libboost-test-dev \
         file \
         perl \
         build-essential \
