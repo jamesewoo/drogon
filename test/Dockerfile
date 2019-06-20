@@ -4,17 +4,10 @@ ENV SPANISH "$HOME/git/fisher-callhome-corpus"
 
 WORKDIR "$HOME"
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends -y \
-        unzip \
-        less && \
-    rm -rf /var/lib/apt/lists/* && \
-    (mkdir git && \
+RUN (mkdir -p git/fisher-callhome-corpus && \
         cd git && \
-        curl -o fisher-callhome-corpus.zip https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/legacy.zip/master && \
-        unzip fisher-callhome-corpus.zip && \
-        mv joshua-decoder-*/ fisher-callhome-corpus) && \
+        curl -SL https://codeload.github.com/joshua-decoder/fisher-callhome-corpus/tar.gz/master | \
+        tar --strip-components=1 -xzC fisher-callhome-corpus) && \
     (mkdir -p "$MODELS_DIR/es-en" && \
         cd "$MODELS_DIR/es-en" && \
         "$JOSHUA/bin/pipeline.pl" \

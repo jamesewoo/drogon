@@ -38,12 +38,13 @@ RUN mkdir -p /usr/share/man/man1 && \
     (cd ext/berkeleyaligner; ant)
 
 
-FROM nginx AS runtime
+FROM debian:stretch-slim AS runtime
 
 ENV HADOOP_HOME /opt/hadoop
 ENV HOME /root
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV JOSHUA /opt/joshua
+ENV MODELS_DIR /models
 ENV PATH "${HADOOP_HOME}/bin:${PATH}"
 ENV USER root
 
@@ -68,9 +69,9 @@ RUN mkdir -p /usr/share/man/man1 && \
         curl \
         python && \
     rm -rf /var/lib/apt/lists/* && \
+    mkdir -p "$HADOOP_HOME" && \
     HADOOP_VERSION=2.9.2 && \
     curl -SL "http://apache.mirrors.hoobly.com/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | \
-    tar -xz && \
-    mv "hadoop-$HADOOP_VERSION" "$HADOOP_HOME"
+    tar --strip-components=1 -xzC "$HADOOP_HOME"
 
-ENV MODELS_DIR /models
+CMD ["bash"]
