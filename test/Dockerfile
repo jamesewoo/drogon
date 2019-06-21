@@ -35,5 +35,4 @@ COPY test.sh .
 RUN "$JOSHUA/scripts/language-pack/build_lp.sh" es-en 1/tune/joshua.config.final 8g
 
 ENTRYPOINT ["./test.sh"]
-
 CMD ["es"]

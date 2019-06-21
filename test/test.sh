@@ -16,11 +16,9 @@ if [ "$1" = 'es' ]; then
         done
 
         # run queries
-        "$JOSHUA/scripts/support/query_http.py" -s localhost -p "$JOSHUA_SERVER_PORT" 1/data/test/test.es
+        exec "$JOSHUA/scripts/support/query_http.py" -s localhost -p "$JOSHUA_SERVER_PORT" 1/data/test/test.es
     done
 
 else
-
     exec "$@"
-
 fi
