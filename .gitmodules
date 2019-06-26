@@ -19,3 +19,6 @@
 [submodule "src/joshua"]
 	path = src/joshua
 	url = https://github.com/jamesewoo/joshua.git
+[submodule "drogon-server"]
+	path = src/drogon-server
+	url = https://github.com/jamesewoo/joshua_translation_engine.git
