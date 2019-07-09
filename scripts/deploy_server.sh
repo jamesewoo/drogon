@@ -26,7 +26,7 @@ docker run -v es-en:/models drogon:server es-test
 
 # test endpoint from host machine
 docker stack deploy -c docker-compose.yml drogon
-sleep 6
+sleep 7
 curl localhost:9080/translate/english -H "Content-Type: application/json" -X POST -d '{"inputLanguage": "spanish", "inputText": "los pollos hermanos"}'
 docker stack rm drogon
 
